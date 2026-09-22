@@ -1,3 +1,4 @@
+```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -105,7 +106,7 @@ document
             // Save JWT
             localStorage.setItem("token", data.token);
 
-            // Save email temporarily for UI
+            // Save email for UI
             localStorage.setItem("userEmail", email);
 
             document.getElementById("userName").textContent =
@@ -127,7 +128,7 @@ document
 
 
 // ==========================================
-// REGISTER
+// REGISTER / SIGNUP
 // ==========================================
 
 document
@@ -168,14 +169,21 @@ document
 
             if (!response.ok) {
 
-                alert(data.message || "Registration failed");
+                alert(
+                    data.message ||
+                    "Registration failed"
+                );
 
                 return;
             }
 
-            alert("Account created successfully. Please log in.");
+            alert(
+                "Account created successfully. Please log in."
+            );
 
-            document.getElementById("registerForm").reset();
+            document
+                .getElementById("registerForm")
+                .reset();
 
             showLogin();
 
@@ -195,7 +203,8 @@ document
 
 async function loadNotes() {
 
-    const token = localStorage.getItem("token");
+    const token =
+        localStorage.getItem("token");
 
     if (!token) {
         return;
@@ -220,6 +229,10 @@ async function loadNotes() {
 
             console.error(data);
 
+            if (response.status === 401) {
+                logoutUser();
+            }
+
             return;
         }
 
@@ -227,7 +240,10 @@ async function loadNotes() {
 
     } catch (error) {
 
-        console.error("Load notes error:", error);
+        console.error(
+            "Load notes error:",
+            error
+        );
     }
 }
 
@@ -271,18 +287,35 @@ function displayNotes(notes) {
                     ${formatDate(note.createdAt)}
                 </span>
 
-                <button
-                    class="icon-btn"
-                    onclick="deleteNote('${note._id}')"
-                >
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <div>
+
+                    <button
+                        class="icon-btn"
+                        onclick="editNote('${note._id}')"
+                        title="Edit note"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                    <button
+                        class="icon-btn"
+                        onclick="deleteNote('${note._id}')"
+                        title="Delete note"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                </div>
 
             </div>
 
-            <h3>${escapeHtml(note.title || "Untitled")}</h3>
+            <h3>
+                ${escapeHtml(note.title || "Untitled")}
+            </h3>
 
-            <p>${escapeHtml(note.content || "")}</p>
+            <p>
+                ${escapeHtml(note.content || "")}
+            </p>
 
             <div class="note-footer">
 
@@ -326,6 +359,15 @@ document
             return;
         }
 
+        if (!title || !content) {
+
+            alert(
+                "Please enter both title and note content."
+            );
+
+            return;
+        }
+
         try {
 
             const response = await fetch(
@@ -349,12 +391,17 @@ document
 
             if (!response.ok) {
 
-                alert(data.message || "Could not create note");
+                alert(
+                    data.message ||
+                    "Could not create note"
+                );
 
                 return;
             }
 
-            document.getElementById("noteForm").reset();
+            document
+                .getElementById("noteForm")
+                .reset();
 
             document
                 .getElementById("noteModal")
@@ -364,12 +411,149 @@ document
 
         } catch (error) {
 
-            console.error("Create note error:", error);
+            console.error(
+                "Create note error:",
+                error
+            );
 
-            alert("Unable to connect to the server.");
+            alert(
+                "Unable to connect to the server."
+            );
         }
 
     });
+
+
+// ==========================================
+// EDIT NOTE
+// ==========================================
+
+async function editNote(noteId) {
+
+    const token =
+        localStorage.getItem("token");
+
+    if (!token) {
+
+        alert("Please log in first.");
+
+        return;
+    }
+
+    try {
+
+        // Get current note
+        const response = await fetch(
+            `${API_BASE_URL}/api/notes/${noteId}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                "Could not load note."
+            );
+
+            return;
+        }
+
+        // Support both:
+        // { note: {...} }
+        // and direct note object
+        const note =
+            data.note || data;
+
+        // Ask for updated title
+        const newTitle =
+            prompt(
+                "Edit note title:",
+                note.title || ""
+            );
+
+        if (newTitle === null) {
+            return;
+        }
+
+        // Ask for updated content
+        const newContent =
+            prompt(
+                "Edit note content:",
+                note.content || ""
+            );
+
+        if (newContent === null) {
+            return;
+        }
+
+        if (
+            !newTitle.trim() ||
+            !newContent.trim()
+        ) {
+
+            alert(
+                "Title and content cannot be empty."
+            );
+
+            return;
+        }
+
+        // Update note
+        const updateResponse =
+            await fetch(
+                `${API_BASE_URL}/api/notes/${noteId}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+
+                    body: JSON.stringify({
+                        title: newTitle.trim(),
+                        content: newContent.trim()
+                    })
+                }
+            );
+
+        const updateData =
+            await updateResponse.json();
+
+        if (!updateResponse.ok) {
+
+            alert(
+                updateData.message ||
+                "Could not update note."
+            );
+
+            return;
+        }
+
+        // Refresh notes
+        await loadNotes();
+
+    } catch (error) {
+
+        console.error(
+            "Edit note error:",
+            error
+        );
+
+        alert(
+            "Unable to connect to the server."
+        );
+    }
+}
 
 
 // ==========================================
@@ -386,7 +570,9 @@ async function deleteNote(noteId) {
     }
 
     const confirmDelete =
-        confirm("Are you sure you want to delete this note?");
+        confirm(
+            "Are you sure you want to delete this note?"
+        );
 
     if (!confirmDelete) {
         return;
@@ -405,11 +591,15 @@ async function deleteNote(noteId) {
             }
         );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
-            alert(data.message || "Could not delete note");
+            alert(
+                data.message ||
+                "Could not delete note"
+            );
 
             return;
         }
@@ -418,9 +608,14 @@ async function deleteNote(noteId) {
 
     } catch (error) {
 
-        console.error("Delete note error:", error);
+        console.error(
+            "Delete note error:",
+            error
+        );
 
-        alert("Unable to connect to the server.");
+        alert(
+            "Unable to connect to the server."
+        );
     }
 }
 
@@ -433,34 +628,51 @@ const noteModal =
     document.getElementById("noteModal");
 
 document
-    .querySelectorAll(".new-note-btn, .empty-btn")
+    .querySelectorAll(
+        ".new-note-btn, .empty-btn"
+    )
     .forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            noteModal.classList.remove("hidden");
+                noteModal.classList.remove(
+                    "hidden"
+                );
 
-        });
+            }
+        );
 
     });
 
 
 document
     .querySelector(".close-modal")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        noteModal.classList.add("hidden");
+            noteModal.classList.add(
+                "hidden"
+            );
 
-    });
+        }
+    );
 
 
 document
     .querySelector(".modal-overlay")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        noteModal.classList.add("hidden");
+            noteModal.classList.add(
+                "hidden"
+            );
 
-    });
+        }
+    );
 
 
 // ==========================================
@@ -469,17 +681,26 @@ document
 
 document
     .querySelector(".logout-btn")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("userEmail");
+            logoutUser();
 
-        dashboardPage.classList.add("hidden");
-        authPage.classList.remove("hidden");
+        }
+    );
 
-        showLogin();
 
-    });
+function logoutUser() {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
+
+    dashboardPage.classList.add("hidden");
+    authPage.classList.remove("hidden");
+
+    showLogin();
+}
 
 
 // ==========================================
@@ -488,7 +709,8 @@ document
 
 function escapeHtml(value) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
     div.textContent = value;
 
@@ -511,3 +733,4 @@ function formatDate(date) {
         }
     );
 }
+```
