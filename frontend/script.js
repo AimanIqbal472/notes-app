@@ -64,8 +64,6 @@ function togglePassword(inputId, button) {
 // LOGIN
 // ==========================================
 
-
-
 document
     .getElementById("loginForm")
     .addEventListener("submit", async function (event) {
@@ -81,7 +79,7 @@ document
         try {
 
             const response = await fetch(
-                `${API_BASE_URL}/api/auth/login`,
+                API_BASE_URL + "/api/auth/login",
                 {
                     method: "POST",
 
@@ -127,6 +125,8 @@ document
         }
 
     });
+
+
 // ==========================================
 // REGISTER / SIGNUP
 // ==========================================
@@ -149,7 +149,7 @@ document
         try {
 
             const response = await fetch(
-                `${API_BASE_URL}/api/auth/signup`,
+                API_BASE_URL + "/api/auth/signup",
                 {
                     method: "POST",
 
@@ -158,9 +158,9 @@ document
                     },
 
                     body: JSON.stringify({
-                        name,
-                        email,
-                        password
+                        name: name,
+                        email: email,
+                        password: password
                     })
                 }
             );
@@ -189,9 +189,14 @@ document
 
         } catch (error) {
 
-            console.error("Register error:", error);
+            console.error(
+                "Register error:",
+                error
+            );
 
-            alert("Unable to connect to the server.");
+            alert(
+                "Unable to connect to the server."
+            );
         }
 
     });
@@ -213,12 +218,12 @@ async function loadNotes() {
     try {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/notes`,
+            API_BASE_URL + "/api/notes",
             {
                 method: "GET",
 
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": "Bearer " + token
                 }
             }
         );
@@ -273,7 +278,7 @@ function displayNotes(notes) {
     emptyState.classList.add("hidden");
     notesGrid.classList.remove("hidden");
 
-    notes.forEach(note => {
+    notes.forEach(function (note) {
 
         const noteCard =
             document.createElement("article");
@@ -371,18 +376,18 @@ document
         try {
 
             const response = await fetch(
-                `${API_BASE_URL}/api/notes`,
+                API_BASE_URL + "/api/notes",
                 {
                     method: "POST",
 
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+                        "Authorization": "Bearer " + token
                     },
 
                     body: JSON.stringify({
-                        title,
-                        content
+                        title: title,
+                        content: content
                     })
                 }
             );
@@ -442,14 +447,14 @@ async function editNote(noteId) {
 
     try {
 
-        // Get current note
+        // Get existing note
         const response = await fetch(
-            `${API_BASE_URL}/api/notes/${noteId}`,
+            API_BASE_URL + "/api/notes/" + noteId,
             {
                 method: "GET",
 
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": "Bearer " + token
                 }
             }
         );
@@ -467,13 +472,9 @@ async function editNote(noteId) {
             return;
         }
 
-        // Support both:
-        // { note: {...} }
-        // and direct note object
         const note =
             data.note || data;
 
-        // Ask for updated title
         const newTitle =
             prompt(
                 "Edit note title:",
@@ -484,7 +485,6 @@ async function editNote(noteId) {
             return;
         }
 
-        // Ask for updated content
         const newContent =
             prompt(
                 "Edit note content:",
@@ -510,13 +510,13 @@ async function editNote(noteId) {
         // Update note
         const updateResponse =
             await fetch(
-                `${API_BASE_URL}/api/notes/${noteId}`,
+                API_BASE_URL + "/api/notes/" + noteId,
                 {
                     method: "PUT",
 
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+                        "Authorization": "Bearer " + token
                     },
 
                     body: JSON.stringify({
@@ -539,7 +539,6 @@ async function editNote(noteId) {
             return;
         }
 
-        // Refresh notes
         await loadNotes();
 
     } catch (error) {
@@ -581,12 +580,12 @@ async function deleteNote(noteId) {
     try {
 
         const response = await fetch(
-            `${API_BASE_URL}/api/notes/${noteId}`,
+            API_BASE_URL + "/api/notes/" + noteId,
             {
                 method: "DELETE",
 
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": "Bearer " + token
                 }
             }
         );
@@ -631,11 +630,11 @@ document
     .querySelectorAll(
         ".new-note-btn, .empty-btn"
     )
-    .forEach(button => {
+    .forEach(function (button) {
 
         button.addEventListener(
             "click",
-            () => {
+            function () {
 
                 noteModal.classList.remove(
                     "hidden"
@@ -651,7 +650,7 @@ document
     .querySelector(".close-modal")
     .addEventListener(
         "click",
-        () => {
+        function () {
 
             noteModal.classList.add(
                 "hidden"
@@ -665,7 +664,7 @@ document
     .querySelector(".modal-overlay")
     .addEventListener(
         "click",
-        () => {
+        function () {
 
             noteModal.classList.add(
                 "hidden"
@@ -683,7 +682,7 @@ document
     .querySelector(".logout-btn")
     .addEventListener(
         "click",
-        () => {
+        function () {
 
             logoutUser();
 
