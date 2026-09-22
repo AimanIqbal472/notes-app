@@ -64,6 +64,8 @@ function togglePassword(inputId, button) {
 // LOGIN
 // ==========================================
 
+
+
 document
     .getElementById("loginForm")
     .addEventListener("submit", async function (event) {
@@ -88,8 +90,8 @@ document
                     },
 
                     body: JSON.stringify({
-                        email,
-                        password
+                        email: email,
+                        password: password
                     })
                 }
             );
@@ -125,8 +127,6 @@ document
         }
 
     });
-
-
 // ==========================================
 // REGISTER / SIGNUP
 // ==========================================
