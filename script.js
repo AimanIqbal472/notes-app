@@ -1,4 +1,3 @@
-```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -106,7 +105,7 @@ document
             // Save JWT
             localStorage.setItem("token", data.token);
 
-            // Save user email
+            // Save email for UI
             localStorage.setItem("userEmail", email);
 
             document.getElementById("userName").textContent =
@@ -235,7 +234,6 @@ async function loadNotes() {
     } catch (error) {
 
         console.error("Load notes error:", error);
-
     }
 }
 
@@ -381,7 +379,10 @@ document
 
             if (!response.ok) {
 
-                alert(data.message || "Could not create note");
+                alert(
+                    data.message ||
+                    "Could not create note"
+                );
 
                 return;
             }
@@ -440,30 +441,32 @@ async function editNote(noteId) {
 
         if (!response.ok) {
 
-            alert(data.message || "Could not load note.");
+            alert(
+                data.message ||
+                "Could not load note."
+            );
 
             return;
         }
 
-        // Your API may return the note directly
-        // or inside a "note" property.
+        // Support either:
+        // { note: {...} }
+        // or direct note object
         const note = data.note || data;
 
-        const newTitle =
-            prompt(
-                "Edit note title:",
-                note.title || ""
-            );
+        const newTitle = prompt(
+            "Edit note title:",
+            note.title || ""
+        );
 
         if (newTitle === null) {
             return;
         }
 
-        const newContent =
-            prompt(
-                "Edit note content:",
-                note.content || ""
-            );
+        const newContent = prompt(
+            "Edit note content:",
+            note.content || ""
+        );
 
         if (newContent === null) {
             return;
@@ -471,7 +474,9 @@ async function editNote(noteId) {
 
         if (!newTitle.trim() || !newContent.trim()) {
 
-            alert("Title and content cannot be empty.");
+            alert(
+                "Title and content cannot be empty."
+            );
 
             return;
         }
@@ -507,6 +512,7 @@ async function editNote(noteId) {
             return;
         }
 
+        // Reload notes
         await loadNotes();
 
     } catch (error) {
@@ -669,4 +675,3 @@ function formatDate(date) {
         }
     );
 }
-```
