@@ -17,7 +17,8 @@ app.use(
     cors({
         origin: [
             "http://127.0.0.1:5500",
-            "http://localhost:5500"
+            "http://localhost:5500",
+    "https://notes-app-ui-sepia.vercel.app"
         ],
         methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization"]
