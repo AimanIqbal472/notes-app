@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Notes</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+</head>
+
+<body>
+
+    <!-- ================= AUTH PAGE ================= -->
+
+    <main id="authPage" class="auth-page">
+
+        <section class="auth-left">
+
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+
+                <span>Notes</span>
+            </div>
+
+            <div class="hero-content">
+                <span class="eyebrow">YOUR IDEAS, ORGANIZED</span>
+
+                <h1>
+                    Keep your thoughts
+                    <span>clear & organized.</span>
+                </h1>
+
+                <p>
+                    Capture your ideas, manage your notes and keep
+                    everything you need in one simple workspace.
+                </p>
+            </div>
+
+            <div class="hero-card">
+                <div class="mini-note-icon">
+                    <i class="fa-solid fa-lightbulb"></i>
+                </div>
+
+                <div>
+                    <strong>Everything in one place</strong>
+                    <p>Write. Organize. Remember.</p>
+                </div>
+            </div>
+
+        </section>
+
+
+        <section class="auth-right">
+
+            <div class="auth-container">
+
+                <div class="mobile-brand">
+                    <div class="brand-icon">
+                        <i class="fa-solid fa-note-sticky"></i>
+                    </div>
+                    <span>Notes</span>
+                </div>
+
+                <!-- LOGIN -->
+
+                <div id="loginFormContainer" class="auth-form-container">
+
+                    <div class="auth-heading">
+                        <h2>Welcome back</h2>
+                        <p>Sign in to continue to your notes.</p>
+                    </div>
+
+                    <form id="loginForm">
+
+                        <div class="input-group">
+                            <label for="loginEmail">Email</label>
+
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-envelope"></i>
+
+                                <input
+                                    type="email"
+                                    id="loginEmail"
+                                    placeholder="you@example.com"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="loginPassword">Password</label>
+
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="loginPassword"
+                                    placeholder="Enter your password"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('loginPassword', this)"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Sign In
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+                    <p class="switch-text">
+                        Don't have an account?
+                        <button type="button" onclick="showRegister()">
+                            Create account
+                        </button>
+                    </p>
+
+                </div>
+
+
+                <!-- REGISTER -->
+
+                <div
+                    id="registerFormContainer"
+                    class="auth-form-container hidden"
+                >
+
+                    <div class="auth-heading">
+                        <h2>Create your account</h2>
+                        <p>Start organizing your notes today.</p>
+                    </div>
+
+                    <form id="registerForm">
+
+                        <div class="input-group">
+                            <label for="registerName">Full Name</label>
+
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-user"></i>
+
+                                <input
+                                    type="text"
+                                    id="registerName"
+                                    placeholder="Your name"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="registerEmail">Email</label>
+
+                            <div class="input-wrapper">
+                                <i class="fa-regular fa-envelope"></i>
+
+                                <input
+                                    type="email"
+                                    id="registerEmail"
+                                    placeholder="you@example.com"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="registerPassword">Password</label>
+
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+
+                                <input
+                                    type="password"
+                                    id="registerPassword"
+                                    placeholder="Create a password"
+                                    required
+                                >
+
+                                <button
+                                    type="button"
+                                    class="password-toggle"
+                                    onclick="togglePassword('registerPassword', this)"
+                                >
+                                    <i class="fa-regular fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Create Account
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+
+                    </form>
+
+                    <p class="switch-text">
+                        Already have an account?
+                        <button type="button" onclick="showLogin()">
+                            Sign in
+                        </button>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= DASHBOARD ================= -->
+
+    <main id="dashboardPage" class="dashboard-page hidden">
+
+        <!-- SIDEBAR -->
+
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+
+                <div class="brand-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+
+                <span>Notes</span>
+
+            </div>
+
+
+            <nav class="sidebar-nav">
+
+                <a href="#" class="nav-item active">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>All Notes</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <i class="fa-regular fa-star"></i>
+                    <span>Favorites</span>
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <button class="nav-item logout-btn">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+
+        <section class="dashboard-content">
+
+            <header class="dashboard-header">
+
+                <div>
+                    <p class="dashboard-label">YOUR WORKSPACE</p>
+                    <h1>My Notes</h1>
+                </div>
+
+                <div class="user-profile">
+
+                    <div class="avatar">
+                        A
+                    </div>
+
+                    <div class="user-info">
+                        <strong id="userName">User</strong>
+                        <span>Personal workspace</span>
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <div class="toolbar">
+
+                <div class="search-box">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input
+                        type="text"
+                        placeholder="Search your notes..."
+                    >
+
+                </div>
+
+                <button class="new-note-btn">
+                    <i class="fa-solid fa-plus"></i>
+                    New Note
+                </button>
+
+            </div>
+
+
+            <!-- EMPTY STATE -->
+
+            <div id="emptyState" class="empty-state">
+
+                <div class="empty-icon">
+                    <i class="fa-regular fa-note-sticky"></i>
+                </div>
+
+                <h2>No notes yet</h2>
+
+                <p>
+                    Start capturing your thoughts by creating
+                    your first note.
+                </p>
+
+                <button class="primary-btn empty-btn">
+                    <i class="fa-solid fa-plus"></i>
+                    Create Your First Note
+                </button>
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <div id="notesGrid" class="notes-grid hidden">
+
+                <article class="note-card">
+
+                    <div class="note-top">
+                        <span class="note-date">Today</span>
+
+                        <button class="icon-btn">
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </button>
+                    </div>
+
+                    <h3>Welcome to Notes</h3>
+
+                    <p>
+                        Start creating notes and keep your
+                        ideas organized in one place.
+                    </p>
+
+                    <div class="note-footer">
+                        <span>
+                            <i class="fa-regular fa-clock"></i>
+                            Just now
+                        </span>
+
+                        <button class="delete-btn">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= NEW NOTE MODAL ================= -->
+
+    <div id="noteModal" class="modal hidden">
+
+        <div class="modal-overlay"></div>
+
+        <div class="modal-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <p class="dashboard-label">NEW NOTE</p>
+                    <h2>Create a note</h2>
+                </div>
+
+                <button class="close-modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+            </div>
+
+            <form id="noteForm">
+
+                <div class="input-group">
+
+                    <label for="noteTitle">
+                        Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="noteTitle"
+                        placeholder="Enter note title"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="input-group">
+
+                    <label for="noteContent">
+                        Note
+                    </label>
+
+                    <textarea
+                        id="noteContent"
+                        rows="7"
+                        placeholder="Write your note here..."
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <button type="submit" class="primary-btn">
+                    Save Note
+                    <i class="fa-solid fa-check"></i>
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+</html>
