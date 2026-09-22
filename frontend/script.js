@@ -253,6 +253,7 @@ async function loadNotes() {
 }
 
 
+```javascript
 // ==========================================
 // DISPLAY NOTES
 // ==========================================
@@ -285,57 +286,77 @@ function displayNotes(notes) {
 
         noteCard.className = "note-card";
 
-        noteCard.innerHTML = `
-            <div class="note-top">
+        // Create card elements without template literals
+        const noteTop = document.createElement("div");
+        noteTop.className = "note-top";
 
-                <span class="note-date">
-                    ${formatDate(note.createdAt)}
-                </span>
+        const noteDate = document.createElement("span");
+        noteDate.className = "note-date";
+        noteDate.textContent = formatDate(note.createdAt);
 
-                <div>
+        const actionContainer = document.createElement("div");
 
-                    <button
-                        class="icon-btn"
-                        onclick="editNote('${note._id}')"
-                        title="Edit note"
-                    >
-                        <i class="fa-solid fa-pen"></i>
-                    </button>
+        const editButton = document.createElement("button");
+        editButton.className = "icon-btn";
+        editButton.title = "Edit note";
 
-                    <button
-                        class="icon-btn"
-                        onclick="deleteNote('${note._id}')"
-                        title="Delete note"
-                    >
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+        editButton.innerHTML =
+            '<i class="fa-solid fa-pen"></i>';
 
-                </div>
+        editButton.addEventListener("click", function () {
+            editNote(note._id);
+        });
 
-            </div>
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "icon-btn";
+        deleteButton.title = "Delete note";
 
-            <h3>
-                ${escapeHtml(note.title || "Untitled")}
-            </h3>
+        deleteButton.innerHTML =
+            '<i class="fa-solid fa-trash"></i>';
 
-            <p>
-                ${escapeHtml(note.content || "")}
-            </p>
+        deleteButton.addEventListener("click", function () {
+            deleteNote(note._id);
+        });
 
-            <div class="note-footer">
+        actionContainer.appendChild(editButton);
+        actionContainer.appendChild(deleteButton);
 
-                <span>
-                    <i class="fa-regular fa-clock"></i>
-                    Note
-                </span>
+        noteTop.appendChild(noteDate);
+        noteTop.appendChild(actionContainer);
 
-            </div>
-        `;
+
+        const title = document.createElement("h3");
+
+        title.textContent =
+            note.title || "Untitled";
+
+
+        const content = document.createElement("p");
+
+        content.textContent =
+            note.content || "";
+
+
+        const noteFooter = document.createElement("div");
+        noteFooter.className = "note-footer";
+
+        const noteType = document.createElement("span");
+
+        noteType.innerHTML =
+            '<i class="fa-regular fa-clock"></i> Note';
+
+        noteFooter.appendChild(noteType);
+
+
+        noteCard.appendChild(noteTop);
+        noteCard.appendChild(title);
+        noteCard.appendChild(content);
+        noteCard.appendChild(noteFooter);
 
         notesGrid.appendChild(noteCard);
-
     });
 }
+```
 
 
 // ==========================================
