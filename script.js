@@ -1,3 +1,4 @@
+```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -105,7 +106,7 @@ document
             // Save JWT
             localStorage.setItem("token", data.token);
 
-            // Save email temporarily for UI
+            // Save user email
             localStorage.setItem("userEmail", email);
 
             document.getElementById("userName").textContent =
@@ -127,7 +128,7 @@ document
 
 
 // ==========================================
-// REGISTER
+// REGISTER / SIGNUP
 // ==========================================
 
 document
@@ -175,7 +176,9 @@ document
 
             alert("Account created successfully. Please log in.");
 
-            document.getElementById("registerForm").reset();
+            document
+                .getElementById("registerForm")
+                .reset();
 
             showLogin();
 
@@ -220,6 +223,10 @@ async function loadNotes() {
 
             console.error(data);
 
+            if (response.status === 401) {
+                logoutUser();
+            }
+
             return;
         }
 
@@ -228,6 +235,7 @@ async function loadNotes() {
     } catch (error) {
 
         console.error("Load notes error:", error);
+
     }
 }
 
@@ -271,18 +279,35 @@ function displayNotes(notes) {
                     ${formatDate(note.createdAt)}
                 </span>
 
-                <button
-                    class="icon-btn"
-                    onclick="deleteNote('${note._id}')"
-                >
-                    <i class="fa-solid fa-trash"></i>
-                </button>
+                <div>
+
+                    <button
+                        class="icon-btn"
+                        onclick="editNote('${note._id}')"
+                        title="Edit note"
+                    >
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+
+                    <button
+                        class="icon-btn"
+                        onclick="deleteNote('${note._id}')"
+                        title="Delete note"
+                    >
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                </div>
 
             </div>
 
-            <h3>${escapeHtml(note.title || "Untitled")}</h3>
+            <h3>
+                ${escapeHtml(note.title || "Untitled")}
+            </h3>
 
-            <p>${escapeHtml(note.content || "")}</p>
+            <p>
+                ${escapeHtml(note.content || "")}
+            </p>
 
             <div class="note-footer">
 
@@ -326,6 +351,13 @@ document
             return;
         }
 
+        if (!title || !content) {
+
+            alert("Please enter both title and note content.");
+
+            return;
+        }
+
         try {
 
             const response = await fetch(
@@ -354,7 +386,9 @@ document
                 return;
             }
 
-            document.getElementById("noteForm").reset();
+            document
+                .getElementById("noteForm")
+                .reset();
 
             document
                 .getElementById("noteModal")
@@ -373,6 +407,118 @@ document
 
 
 // ==========================================
+// EDIT NOTE
+// ==========================================
+
+async function editNote(noteId) {
+
+    const token =
+        localStorage.getItem("token");
+
+    if (!token) {
+
+        alert("Please log in first.");
+
+        return;
+    }
+
+    try {
+
+        // Get the current note
+        const response = await fetch(
+            `${API_BASE_URL}/api/notes/${noteId}`,
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            alert(data.message || "Could not load note.");
+
+            return;
+        }
+
+        // Your API may return the note directly
+        // or inside a "note" property.
+        const note = data.note || data;
+
+        const newTitle =
+            prompt(
+                "Edit note title:",
+                note.title || ""
+            );
+
+        if (newTitle === null) {
+            return;
+        }
+
+        const newContent =
+            prompt(
+                "Edit note content:",
+                note.content || ""
+            );
+
+        if (newContent === null) {
+            return;
+        }
+
+        if (!newTitle.trim() || !newContent.trim()) {
+
+            alert("Title and content cannot be empty.");
+
+            return;
+        }
+
+        // Update note
+        const updateResponse = await fetch(
+            `${API_BASE_URL}/api/notes/${noteId}`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+
+                body: JSON.stringify({
+                    title: newTitle.trim(),
+                    content: newContent.trim()
+                })
+            }
+        );
+
+        const updateData =
+            await updateResponse.json();
+
+        if (!updateResponse.ok) {
+
+            alert(
+                updateData.message ||
+                "Could not update note."
+            );
+
+            return;
+        }
+
+        await loadNotes();
+
+    } catch (error) {
+
+        console.error("Edit note error:", error);
+
+        alert("Unable to connect to the server.");
+    }
+}
+
+
+// ==========================================
 // DELETE NOTE
 // ==========================================
 
@@ -386,7 +532,9 @@ async function deleteNote(noteId) {
     }
 
     const confirmDelete =
-        confirm("Are you sure you want to delete this note?");
+        confirm(
+            "Are you sure you want to delete this note?"
+        );
 
     if (!confirmDelete) {
         return;
@@ -409,7 +557,10 @@ async function deleteNote(noteId) {
 
         if (!response.ok) {
 
-            alert(data.message || "Could not delete note");
+            alert(
+                data.message ||
+                "Could not delete note"
+            );
 
             return;
         }
@@ -471,15 +622,21 @@ document
     .querySelector(".logout-btn")
     .addEventListener("click", () => {
 
-        localStorage.removeItem("token");
-        localStorage.removeItem("userEmail");
-
-        dashboardPage.classList.add("hidden");
-        authPage.classList.remove("hidden");
-
-        showLogin();
+        logoutUser();
 
     });
+
+
+function logoutUser() {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
+
+    dashboardPage.classList.add("hidden");
+    authPage.classList.remove("hidden");
+
+    showLogin();
+}
 
 
 // ==========================================
@@ -488,7 +645,8 @@ document
 
 function escapeHtml(value) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
     div.textContent = value;
 
@@ -511,3 +669,4 @@ function formatDate(date) {
         }
     );
 }
+```
