@@ -1,4 +1,3 @@
-```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -43,6 +42,10 @@ function togglePassword(inputId, button) {
 
     const input = document.getElementById(inputId);
 
+    if (!input) {
+        return;
+    }
+
     if (input.type === "password") {
 
         input.type = "text";
@@ -61,12 +64,45 @@ function togglePassword(inputId, button) {
 
 
 // ==========================================
+// RESPONSE HELPER
+// ==========================================
+
+async function getResponseData(response) {
+
+    const text = await response.text();
+
+    if (!text) {
+        return {};
+    }
+
+    try {
+
+        return JSON.parse(text);
+
+    } catch (error) {
+
+        console.error(
+            "Server returned a non-JSON response:",
+            text
+        );
+
+        return {
+            message: "Server returned an unexpected response."
+        };
+    }
+}
+
+
+// ==========================================
 // LOGIN
 // ==========================================
 
-document
-    .getElementById("loginForm")
-    .addEventListener("submit", async function (event) {
+const loginForm =
+    document.getElementById("loginForm");
+
+loginForm.addEventListener(
+    "submit",
+    async function (event) {
 
         event.preventDefault();
 
@@ -94,23 +130,43 @@ document
                 }
             );
 
-            const data = await response.json();
+            const data =
+                await getResponseData(response);
 
             if (!response.ok) {
 
-                alert(data.message || "Login failed");
+                alert(
+                    data.message ||
+                    "Login failed."
+                );
+
+                return;
+            }
+
+            if (!data.token) {
+
+                alert(
+                    "Login succeeded, but no token was returned by the server."
+                );
 
                 return;
             }
 
             // Save JWT
-            localStorage.setItem("token", data.token);
+            localStorage.setItem(
+                "token",
+                data.token
+            );
 
-            // Save email for UI
-            localStorage.setItem("userEmail", email);
+            // Save email
+            localStorage.setItem(
+                "userEmail",
+                email
+            );
 
-            document.getElementById("userName").textContent =
-                email.split("@")[0];
+            document
+                .getElementById("userName")
+                .textContent = email.split("@")[0];
 
             authPage.classList.add("hidden");
             dashboardPage.classList.remove("hidden");
@@ -119,32 +175,49 @@ document
 
         } catch (error) {
 
-            console.error("Login error:", error);
+            console.error(
+                "Login error:",
+                error
+            );
 
-            alert("Unable to connect to the server.");
+            alert(
+                "Unable to connect to the server."
+            );
         }
 
-    });
+    }
+);
 
 
 // ==========================================
 // REGISTER / SIGNUP
 // ==========================================
 
-document
-    .getElementById("registerForm")
-    .addEventListener("submit", async function (event) {
+const registerForm =
+    document.getElementById("registerForm");
+
+registerForm.addEventListener(
+    "submit",
+    async function (event) {
 
         event.preventDefault();
 
         const name =
-            document.getElementById("registerName").value.trim();
+            document
+                .getElementById("registerName")
+                .value
+                .trim();
 
         const email =
-            document.getElementById("registerEmail").value.trim();
+            document
+                .getElementById("registerEmail")
+                .value
+                .trim();
 
         const password =
-            document.getElementById("registerPassword").value;
+            document
+                .getElementById("registerPassword")
+                .value;
 
         try {
 
@@ -165,13 +238,14 @@ document
                 }
             );
 
-            const data = await response.json();
+            const data =
+                await getResponseData(response);
 
             if (!response.ok) {
 
                 alert(
                     data.message ||
-                    "Registration failed"
+                    "Registration failed."
                 );
 
                 return;
@@ -181,9 +255,7 @@ document
                 "Account created successfully. Please log in."
             );
 
-            document
-                .getElementById("registerForm")
-                .reset();
+            registerForm.reset();
 
             showLogin();
 
@@ -199,7 +271,8 @@ document
             );
         }
 
-    });
+    }
+);
 
 
 // ==========================================
@@ -223,16 +296,21 @@ async function loadNotes() {
                 method: "GET",
 
                 headers: {
-                    "Authorization": "Bearer " + token
+                    "Authorization":
+                        "Bearer " + token
                 }
             }
         );
 
-        const data = await response.json();
+        const data =
+            await getResponseData(response);
 
         if (!response.ok) {
 
-            console.error(data);
+            console.error(
+                "Load notes failed:",
+                data
+            );
 
             if (response.status === 401) {
                 logoutUser();
@@ -241,7 +319,22 @@ async function loadNotes() {
             return;
         }
 
-        displayNotes(data.notes || []);
+        let notes = [];
+
+        if (Array.isArray(data)) {
+
+            notes = data;
+
+        } else if (Array.isArray(data.notes)) {
+
+            notes = data.notes;
+
+        } else if (Array.isArray(data.data)) {
+
+            notes = data.data;
+        }
+
+        displayNotes(notes);
 
     } catch (error) {
 
@@ -253,7 +346,6 @@ async function loadNotes() {
 }
 
 
-```javascript
 // ==========================================
 // DISPLAY NOTES
 // ==========================================
@@ -268,7 +360,7 @@ function displayNotes(notes) {
 
     notesGrid.innerHTML = "";
 
-    if (notes.length === 0) {
+    if (!notes || notes.length === 0) {
 
         notesGrid.classList.add("hidden");
         emptyState.classList.remove("hidden");
@@ -284,106 +376,236 @@ function displayNotes(notes) {
         const noteCard =
             document.createElement("article");
 
-        noteCard.className = "note-card";
+        noteCard.className =
+            "note-card";
 
-        // Create card elements without template literals
-        const noteTop = document.createElement("div");
-        noteTop.className = "note-top";
 
-        const noteDate = document.createElement("span");
-        noteDate.className = "note-date";
-        noteDate.textContent = formatDate(note.createdAt);
+        // ------------------------------
+        // TOP SECTION
+        // ------------------------------
 
-        const actionContainer = document.createElement("div");
+        const noteTop =
+            document.createElement("div");
 
-        const editButton = document.createElement("button");
-        editButton.className = "icon-btn";
-        editButton.title = "Edit note";
+        noteTop.className =
+            "note-top";
+
+
+        const noteDate =
+            document.createElement("span");
+
+        noteDate.className =
+            "note-date";
+
+        noteDate.textContent =
+            formatDate(note.createdAt);
+
+
+        // ------------------------------
+        // ACTION BUTTONS
+        // ------------------------------
+
+        const actionContainer =
+            document.createElement("div");
+
+
+        // Edit button
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.className =
+            "icon-btn";
+
+        editButton.type =
+            "button";
+
+        editButton.title =
+            "Edit note";
+
+        editButton.setAttribute(
+            "aria-label",
+            "Edit note"
+        );
 
         editButton.innerHTML =
             '<i class="fa-solid fa-pen"></i>';
 
-        editButton.addEventListener("click", function () {
-            editNote(note._id);
-        });
+        editButton.addEventListener(
+            "click",
+            function () {
 
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "icon-btn";
-        deleteButton.title = "Delete note";
+                editNote(note._id);
+
+            }
+        );
+
+
+        // Delete button
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "icon-btn";
+
+        deleteButton.type =
+            "button";
+
+        deleteButton.title =
+            "Delete note";
+
+        deleteButton.setAttribute(
+            "aria-label",
+            "Delete note"
+        );
 
         deleteButton.innerHTML =
             '<i class="fa-solid fa-trash"></i>';
 
-        deleteButton.addEventListener("click", function () {
-            deleteNote(note._id);
-        });
+        deleteButton.addEventListener(
+            "click",
+            function () {
 
-        actionContainer.appendChild(editButton);
-        actionContainer.appendChild(deleteButton);
+                deleteNote(note._id);
 
-        noteTop.appendChild(noteDate);
-        noteTop.appendChild(actionContainer);
+            }
+        );
 
 
-        const title = document.createElement("h3");
+        actionContainer.appendChild(
+            editButton
+        );
+
+        actionContainer.appendChild(
+            deleteButton
+        );
+
+
+        noteTop.appendChild(
+            noteDate
+        );
+
+        noteTop.appendChild(
+            actionContainer
+        );
+
+
+        // ------------------------------
+        // NOTE TITLE
+        // ------------------------------
+
+        const title =
+            document.createElement("h3");
 
         title.textContent =
             note.title || "Untitled";
 
 
-        const content = document.createElement("p");
+        // ------------------------------
+        // NOTE CONTENT
+        // ------------------------------
+
+        const content =
+            document.createElement("p");
 
         content.textContent =
             note.content || "";
 
 
-        const noteFooter = document.createElement("div");
-        noteFooter.className = "note-footer";
+        // ------------------------------
+        // NOTE FOOTER
+        // ------------------------------
 
-        const noteType = document.createElement("span");
+        const noteFooter =
+            document.createElement("div");
+
+        noteFooter.className =
+            "note-footer";
+
+
+        const noteType =
+            document.createElement("span");
 
         noteType.innerHTML =
             '<i class="fa-regular fa-clock"></i> Note';
 
-        noteFooter.appendChild(noteType);
+
+        noteFooter.appendChild(
+            noteType
+        );
 
 
-        noteCard.appendChild(noteTop);
-        noteCard.appendChild(title);
-        noteCard.appendChild(content);
-        noteCard.appendChild(noteFooter);
+        // ------------------------------
+        // BUILD CARD
+        // ------------------------------
 
-        notesGrid.appendChild(noteCard);
+        noteCard.appendChild(
+            noteTop
+        );
+
+        noteCard.appendChild(
+            title
+        );
+
+        noteCard.appendChild(
+            content
+        );
+
+        noteCard.appendChild(
+            noteFooter
+        );
+
+        notesGrid.appendChild(
+            noteCard
+        );
+
     });
 }
-```
 
 
 // ==========================================
 // CREATE NOTE
 // ==========================================
 
-document
-    .getElementById("noteForm")
-    .addEventListener("submit", async function (event) {
+const noteForm =
+    document.getElementById("noteForm");
+
+const noteModal =
+    document.getElementById("noteModal");
+
+
+noteForm.addEventListener(
+    "submit",
+    async function (event) {
 
         event.preventDefault();
 
         const title =
-            document.getElementById("noteTitle").value.trim();
+            document
+                .getElementById("noteTitle")
+                .value
+                .trim();
 
         const content =
-            document.getElementById("noteContent").value.trim();
+            document
+                .getElementById("noteContent")
+                .value
+                .trim();
 
         const token =
             localStorage.getItem("token");
 
+
         if (!token) {
 
-            alert("Please log in first.");
+            alert(
+                "Please log in first."
+            );
 
             return;
         }
+
 
         if (!title || !content) {
 
@@ -394,6 +616,7 @@ document
             return;
         }
 
+
         try {
 
             const response = await fetch(
@@ -402,8 +625,11 @@ document
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            "Bearer " + token
                     },
 
                     body: JSON.stringify({
@@ -413,25 +639,26 @@ document
                 }
             );
 
-            const data = await response.json();
+            const data =
+                await getResponseData(response);
+
 
             if (!response.ok) {
 
                 alert(
                     data.message ||
-                    "Could not create note"
+                    "Could not create note."
                 );
 
                 return;
             }
 
-            document
-                .getElementById("noteForm")
-                .reset();
 
-            document
-                .getElementById("noteModal")
-                .classList.add("hidden");
+            noteForm.reset();
+
+            noteModal.classList.add(
+                "hidden"
+            );
 
             await loadNotes();
 
@@ -447,7 +674,8 @@ document
             );
         }
 
-    });
+    }
+);
 
 
 // ==========================================
@@ -459,29 +687,40 @@ async function editNote(noteId) {
     const token =
         localStorage.getItem("token");
 
+
     if (!token) {
 
-        alert("Please log in first.");
+        alert(
+            "Please log in first."
+        );
 
         return;
     }
 
+
     try {
 
-        // Get existing note
-        const response = await fetch(
-            API_BASE_URL + "/api/notes/" + noteId,
-            {
-                method: "GET",
+        // Get current note
 
-                headers: {
-                    "Authorization": "Bearer " + token
+        const response =
+            await fetch(
+                API_BASE_URL +
+                "/api/notes/" +
+                noteId,
+                {
+                    method: "GET",
+
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
+
 
         const data =
-            await response.json();
+            await getResponseData(response);
+
 
         if (!response.ok) {
 
@@ -493,8 +732,12 @@ async function editNote(noteId) {
             return;
         }
 
+
         const note =
             data.note || data;
+
+
+        // Get new title
 
         const newTitle =
             prompt(
@@ -502,9 +745,13 @@ async function editNote(noteId) {
                 note.title || ""
             );
 
+
         if (newTitle === null) {
             return;
         }
+
+
+        // Get new content
 
         const newContent =
             prompt(
@@ -512,9 +759,11 @@ async function editNote(noteId) {
                 note.content || ""
             );
 
+
         if (newContent === null) {
             return;
         }
+
 
         if (
             !newTitle.trim() ||
@@ -528,27 +777,41 @@ async function editNote(noteId) {
             return;
         }
 
+
         // Update note
+
         const updateResponse =
             await fetch(
-                API_BASE_URL + "/api/notes/" + noteId,
+                API_BASE_URL +
+                "/api/notes/" +
+                noteId,
                 {
                     method: "PUT",
 
                     headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": "Bearer " + token
+                        "Content-Type":
+                            "application/json",
+
+                        "Authorization":
+                            "Bearer " + token
                     },
 
                     body: JSON.stringify({
-                        title: newTitle.trim(),
-                        content: newContent.trim()
+                        title:
+                            newTitle.trim(),
+
+                        content:
+                            newContent.trim()
                     })
                 }
             );
 
+
         const updateData =
-            await updateResponse.json();
+            await getResponseData(
+                updateResponse
+            );
+
 
         if (!updateResponse.ok) {
 
@@ -559,6 +822,7 @@ async function editNote(noteId) {
 
             return;
         }
+
 
         await loadNotes();
 
@@ -585,44 +849,60 @@ async function deleteNote(noteId) {
     const token =
         localStorage.getItem("token");
 
+
     if (!token) {
+
+        alert(
+            "Please log in first."
+        );
+
         return;
     }
+
 
     const confirmDelete =
         confirm(
             "Are you sure you want to delete this note?"
         );
 
+
     if (!confirmDelete) {
         return;
     }
 
+
     try {
 
-        const response = await fetch(
-            API_BASE_URL + "/api/notes/" + noteId,
-            {
-                method: "DELETE",
+        const response =
+            await fetch(
+                API_BASE_URL +
+                "/api/notes/" +
+                noteId,
+                {
+                    method: "DELETE",
 
-                headers: {
-                    "Authorization": "Bearer " + token
+                    headers: {
+                        "Authorization":
+                            "Bearer " + token
+                    }
                 }
-            }
-        );
+            );
+
 
         const data =
-            await response.json();
+            await getResponseData(response);
+
 
         if (!response.ok) {
 
             alert(
                 data.message ||
-                "Could not delete note"
+                "Could not delete note."
             );
 
             return;
         }
+
 
         await loadNotes();
 
@@ -643,9 +923,6 @@ async function deleteNote(noteId) {
 // ==========================================
 // NEW NOTE MODAL
 // ==========================================
-
-const noteModal =
-    document.getElementById("noteModal");
 
 document
     .querySelectorAll(
@@ -716,8 +993,13 @@ function logoutUser() {
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
 
-    dashboardPage.classList.add("hidden");
-    authPage.classList.remove("hidden");
+    dashboardPage.classList.add(
+        "hidden"
+    );
+
+    authPage.classList.remove(
+        "hidden"
+    );
 
     showLogin();
 }
@@ -726,17 +1008,6 @@ function logoutUser() {
 // ==========================================
 // HELPERS
 // ==========================================
-
-function escapeHtml(value) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent = value;
-
-    return div.innerHTML;
-}
-
 
 function formatDate(date) {
 
@@ -753,4 +1024,3 @@ function formatDate(date) {
         }
     );
 }
-```
