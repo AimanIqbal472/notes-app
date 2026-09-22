@@ -1,3 +1,4 @@
+```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -65,6 +66,8 @@ const modalButtonIcon =
 
 let allNotes = [];
 
+let toastTimer = null;
+
 
 // ==========================================
 // INITIALIZATION
@@ -76,7 +79,10 @@ document.addEventListener(
 
         setupEventListeners();
 
-        restoreSession();
+        // Always start with the authentication page.
+        // There is no automatic login on page load.
+        showAuthPage();
+        showLogin();
 
     }
 );
@@ -93,10 +99,12 @@ function setupEventListeners() {
         handleLogin
     );
 
+
     registerForm.addEventListener(
         "submit",
         handleSignup
     );
+
 
     noteForm.addEventListener(
         "submit",
@@ -226,33 +234,8 @@ function setupEventListeners() {
 
 
 // ==========================================
-// SESSION
+// AUTH PAGE
 // ==========================================
-
-async function restoreSession() {
-
-    const token =
-        localStorage.getItem("token");
-
-
-    if (!token) {
-
-        showAuthPage();
-
-        return;
-    }
-
-
-    const email =
-        localStorage.getItem("userEmail") ||
-        "User";
-
-
-    showDashboard(email);
-
-    await loadNotes();
-}
-
 
 function showAuthPage() {
 
@@ -265,6 +248,10 @@ function showAuthPage() {
     );
 }
 
+
+// ==========================================
+// DASHBOARD
+// ==========================================
 
 function showDashboard(email) {
 
@@ -645,13 +632,14 @@ async function handleLogin(event) {
         }
 
 
-        localStorage.setItem(
+        // Store login only for this browser session.
+        sessionStorage.setItem(
             "token",
             data.token
         );
 
 
-        localStorage.setItem(
+        sessionStorage.setItem(
             "userEmail",
             email
         );
@@ -660,7 +648,9 @@ async function handleLogin(event) {
         loginForm.reset();
 
 
-        showDashboard(email);
+        showDashboard(
+            email
+        );
 
 
         await loadNotes();
@@ -701,12 +691,14 @@ async function handleLogin(event) {
 async function loadNotes() {
 
     const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
 
     if (!token) {
 
         showAuthPage();
+
+        showLogin();
 
         return;
     }
@@ -786,7 +778,9 @@ async function loadNotes() {
         }
 
 
-        renderNotes(allNotes);
+        renderNotes(
+            allNotes
+        );
 
     } catch (error) {
 
@@ -881,7 +875,9 @@ function renderNotes(notes) {
     document.getElementById(
         "notesCount"
     ).textContent =
-        String(filteredNotes.length);
+        String(
+            filteredNotes.length
+        );
 
 
     clearSearchBtn.classList.toggle(
@@ -890,7 +886,9 @@ function renderNotes(notes) {
     );
 
 
-    if (filteredNotes.length === 0) {
+    if (
+        filteredNotes.length === 0
+    ) {
 
         notesGrid.classList.add(
             "hidden"
@@ -1221,7 +1219,7 @@ async function handleNoteSubmit(event) {
 
 
     const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
 
     const editingId =
@@ -1244,6 +1242,9 @@ async function handleNoteSubmit(event) {
 
 
     if (!token) {
+
+        showAuthPage();
+        showLogin();
 
         showToast(
             "Please sign in first.",
@@ -1358,12 +1359,10 @@ async function handleNoteSubmit(event) {
 
             logoutUser(false);
 
-
             showToast(
                 "Your session has expired. Please sign in again.",
                 "error"
             );
-
 
             return;
         }
@@ -1380,7 +1379,6 @@ async function handleNoteSubmit(event) {
                 ),
                 "error"
             );
-
 
             return;
         }
@@ -1598,10 +1596,13 @@ function closeNoteModal() {
 async function deleteNote(noteId) {
 
     const token =
-        localStorage.getItem("token");
+        sessionStorage.getItem("token");
 
 
     if (!token) {
+
+        showAuthPage();
+        showLogin();
 
         showToast(
             "Please sign in first.",
@@ -1649,12 +1650,10 @@ async function deleteNote(noteId) {
 
             logoutUser(false);
 
-
             showToast(
                 "Your session has expired. Please sign in again.",
                 "error"
             );
-
 
             return;
         }
@@ -1667,7 +1666,6 @@ async function deleteNote(noteId) {
                 "Could not delete note.",
                 "error"
             );
-
 
             return;
         }
@@ -1703,7 +1701,9 @@ async function deleteNote(noteId) {
 
 function handleSearch() {
 
-    renderNotes(allNotes);
+    renderNotes(
+        allNotes
+    );
 }
 
 
@@ -1726,14 +1726,17 @@ function clearSearch() {
 
 function logoutUser(showMessage) {
 
-    localStorage.removeItem(
+    sessionStorage.removeItem(
         "token"
     );
 
 
-    localStorage.removeItem(
+    sessionStorage.removeItem(
         "userEmail"
     );
+
+
+    allNotes = [];
 
 
     closeNoteModal();
@@ -1743,6 +1746,12 @@ function logoutUser(showMessage) {
 
 
     showLogin();
+
+
+    loginForm.reset();
+
+
+    registerForm.reset();
 
 
     if (showMessage !== false) {
@@ -1810,11 +1819,8 @@ function setButtonLoading(
 
 
 // ==========================================
-// TOASTS
+// TOAST
 // ==========================================
-
-let toastTimer = null;
-
 
 function showToast(
     message,
@@ -1881,39 +1887,4 @@ function showToast(
             3500
         );
 }
-
-
-// ==========================================
-// DATE FORMATTER
-// ==========================================
-
-function formatDate(date) {
-
-    if (!date) {
-        return "Today";
-    }
-
-
-    const parsed =
-        new Date(date);
-
-
-    if (
-        Number.isNaN(
-            parsed.getTime()
-        )
-    ) {
-
-        return "Today";
-    }
-
-
-    return parsed.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
-        }
-    );
-}
+```
