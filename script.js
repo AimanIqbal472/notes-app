@@ -1,3 +1,4 @@
+```javascript
 // ==========================================
 // API CONFIGURATION
 // ==========================================
@@ -168,12 +169,17 @@ document
 
             if (!response.ok) {
 
-                alert(data.message || "Registration failed");
+                alert(
+                    data.message ||
+                    "Registration failed"
+                );
 
                 return;
             }
 
-            alert("Account created successfully. Please log in.");
+            alert(
+                "Account created successfully. Please log in."
+            );
 
             document
                 .getElementById("registerForm")
@@ -197,7 +203,8 @@ document
 
 async function loadNotes() {
 
-    const token = localStorage.getItem("token");
+    const token =
+        localStorage.getItem("token");
 
     if (!token) {
         return;
@@ -233,7 +240,10 @@ async function loadNotes() {
 
     } catch (error) {
 
-        console.error("Load notes error:", error);
+        console.error(
+            "Load notes error:",
+            error
+        );
     }
 }
 
@@ -351,7 +361,9 @@ document
 
         if (!title || !content) {
 
-            alert("Please enter both title and note content.");
+            alert(
+                "Please enter both title and note content."
+            );
 
             return;
         }
@@ -399,9 +411,14 @@ document
 
         } catch (error) {
 
-            console.error("Create note error:", error);
+            console.error(
+                "Create note error:",
+                error
+            );
 
-            alert("Unable to connect to the server.");
+            alert(
+                "Unable to connect to the server."
+            );
         }
 
     });
@@ -425,7 +442,7 @@ async function editNote(noteId) {
 
     try {
 
-        // Get the current note
+        // Get current note
         const response = await fetch(
             `${API_BASE_URL}/api/notes/${noteId}`,
             {
@@ -437,7 +454,8 @@ async function editNote(noteId) {
             }
         );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
@@ -449,30 +467,38 @@ async function editNote(noteId) {
             return;
         }
 
-        // Support either:
+        // Support both:
         // { note: {...} }
-        // or direct note object
-        const note = data.note || data;
+        // and direct note object
+        const note =
+            data.note || data;
 
-        const newTitle = prompt(
-            "Edit note title:",
-            note.title || ""
-        );
+        // Ask for updated title
+        const newTitle =
+            prompt(
+                "Edit note title:",
+                note.title || ""
+            );
 
         if (newTitle === null) {
             return;
         }
 
-        const newContent = prompt(
-            "Edit note content:",
-            note.content || ""
-        );
+        // Ask for updated content
+        const newContent =
+            prompt(
+                "Edit note content:",
+                note.content || ""
+            );
 
         if (newContent === null) {
             return;
         }
 
-        if (!newTitle.trim() || !newContent.trim()) {
+        if (
+            !newTitle.trim() ||
+            !newContent.trim()
+        ) {
 
             alert(
                 "Title and content cannot be empty."
@@ -482,22 +508,23 @@ async function editNote(noteId) {
         }
 
         // Update note
-        const updateResponse = await fetch(
-            `${API_BASE_URL}/api/notes/${noteId}`,
-            {
-                method: "PUT",
+        const updateResponse =
+            await fetch(
+                `${API_BASE_URL}/api/notes/${noteId}`,
+                {
+                    method: "PUT",
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
 
-                body: JSON.stringify({
-                    title: newTitle.trim(),
-                    content: newContent.trim()
-                })
-            }
-        );
+                    body: JSON.stringify({
+                        title: newTitle.trim(),
+                        content: newContent.trim()
+                    })
+                }
+            );
 
         const updateData =
             await updateResponse.json();
@@ -512,14 +539,19 @@ async function editNote(noteId) {
             return;
         }
 
-        // Reload notes
+        // Refresh notes
         await loadNotes();
 
     } catch (error) {
 
-        console.error("Edit note error:", error);
+        console.error(
+            "Edit note error:",
+            error
+        );
 
-        alert("Unable to connect to the server.");
+        alert(
+            "Unable to connect to the server."
+        );
     }
 }
 
@@ -559,7 +591,8 @@ async function deleteNote(noteId) {
             }
         );
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         if (!response.ok) {
 
@@ -575,9 +608,14 @@ async function deleteNote(noteId) {
 
     } catch (error) {
 
-        console.error("Delete note error:", error);
+        console.error(
+            "Delete note error:",
+            error
+        );
 
-        alert("Unable to connect to the server.");
+        alert(
+            "Unable to connect to the server."
+        );
     }
 }
 
@@ -590,34 +628,51 @@ const noteModal =
     document.getElementById("noteModal");
 
 document
-    .querySelectorAll(".new-note-btn, .empty-btn")
+    .querySelectorAll(
+        ".new-note-btn, .empty-btn"
+    )
     .forEach(button => {
 
-        button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            () => {
 
-            noteModal.classList.remove("hidden");
+                noteModal.classList.remove(
+                    "hidden"
+                );
 
-        });
+            }
+        );
 
     });
 
 
 document
     .querySelector(".close-modal")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        noteModal.classList.add("hidden");
+            noteModal.classList.add(
+                "hidden"
+            );
 
-    });
+        }
+    );
 
 
 document
     .querySelector(".modal-overlay")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        noteModal.classList.add("hidden");
+            noteModal.classList.add(
+                "hidden"
+            );
 
-    });
+        }
+    );
 
 
 // ==========================================
@@ -626,11 +681,14 @@ document
 
 document
     .querySelector(".logout-btn")
-    .addEventListener("click", () => {
+    .addEventListener(
+        "click",
+        () => {
 
-        logoutUser();
+            logoutUser();
 
-    });
+        }
+    );
 
 
 function logoutUser() {
@@ -675,3 +733,4 @@ function formatDate(date) {
         }
     );
 }
+```
