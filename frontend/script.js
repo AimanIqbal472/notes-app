@@ -1,10 +1,8 @@
-
 // ==========================================
 // API CONFIGURATION
 // ==========================================
 
 const API_BASE_URL = "https://notes-app-pi-smoky.vercel.app";
-
 
 // ==========================================
 // DOM ELEMENTS
@@ -64,6 +62,18 @@ const modalButtonText =
 const modalButtonIcon =
     document.getElementById("modalButtonIcon");
 
+const notesCount =
+    document.getElementById("notesCount");
+
+const toast =
+    document.getElementById("toast");
+
+const toastMessage =
+    document.getElementById("toastMessage");
+
+const toastIcon =
+    document.getElementById("toastIcon");
+
 let allNotes = [];
 
 let toastTimer = null;
@@ -79,8 +89,12 @@ document.addEventListener(
 
         setupEventListeners();
 
-        // Always start with the authentication page.
-        // There is no automatic login on page load.
+        // Requirement:
+        // Every time the site is opened, start at Sign In.
+        // Do not automatically restore a previous account.
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("userEmail");
+
         showAuthPage();
         showLogin();
 
@@ -94,38 +108,60 @@ document.addEventListener(
 
 function setupEventListeners() {
 
-    loginForm.addEventListener(
-        "submit",
-        handleLogin
-    );
+    if (loginForm) {
+
+        loginForm.addEventListener(
+            "submit",
+            handleLogin
+        );
+
+    }
 
 
-    registerForm.addEventListener(
-        "submit",
-        handleSignup
-    );
+    if (registerForm) {
+
+        registerForm.addEventListener(
+            "submit",
+            handleSignup
+        );
+
+    }
 
 
-    noteForm.addEventListener(
-        "submit",
-        handleNoteSubmit
-    );
+    if (noteForm) {
+
+        noteForm.addEventListener(
+            "submit",
+            handleNoteSubmit
+        );
+
+    }
 
 
-    document
-        .getElementById("showRegisterBtn")
-        .addEventListener(
+    const showRegisterBtn =
+        document.getElementById("showRegisterBtn");
+
+    if (showRegisterBtn) {
+
+        showRegisterBtn.addEventListener(
             "click",
             showRegister
         );
 
+    }
 
-    document
-        .getElementById("showLoginBtn")
-        .addEventListener(
+
+    const showLoginBtn =
+        document.getElementById("showLoginBtn");
+
+    if (showLoginBtn) {
+
+        showLoginBtn.addEventListener(
             "click",
             showLogin
         );
+
+    }
 
 
     document
@@ -169,25 +205,44 @@ function setupEventListeners() {
         );
 
 
-    document
-        .querySelector(".close-modal")
-        .addEventListener(
+    const closeModalButton =
+        document.querySelector(
+            ".close-modal"
+        );
+
+    if (closeModalButton) {
+
+        closeModalButton.addEventListener(
             "click",
             closeNoteModal
         );
 
+    }
 
-    document
-        .querySelector(".modal-overlay")
-        .addEventListener(
+
+    const modalOverlay =
+        document.querySelector(
+            ".modal-overlay"
+        );
+
+    if (modalOverlay) {
+
+        modalOverlay.addEventListener(
             "click",
             closeNoteModal
         );
 
+    }
 
-    document
-        .querySelector(".logout-btn")
-        .addEventListener(
+
+    const logoutButton =
+        document.querySelector(
+            ".logout-btn"
+        );
+
+    if (logoutButton) {
+
+        logoutButton.addEventListener(
             "click",
             function () {
 
@@ -196,23 +251,37 @@ function setupEventListeners() {
             }
         );
 
-
-    searchInput.addEventListener(
-        "input",
-        handleSearch
-    );
+    }
 
 
-    clearSearchBtn.addEventListener(
-        "click",
-        clearSearch
-    );
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            handleSearch
+        );
+
+    }
 
 
-    clearSearchBtnEmpty.addEventListener(
-        "click",
-        clearSearch
-    );
+    if (clearSearchBtn) {
+
+        clearSearchBtn.addEventListener(
+            "click",
+            clearSearch
+        );
+
+    }
+
+
+    if (clearSearchBtnEmpty) {
+
+        clearSearchBtnEmpty.addEventListener(
+            "click",
+            clearSearch
+        );
+
+    }
 
 
     document.addEventListener(
@@ -221,7 +290,10 @@ function setupEventListeners() {
 
             if (
                 event.key === "Escape" &&
-                !noteModal.classList.contains("hidden")
+                noteModal &&
+                !noteModal.classList.contains(
+                    "hidden"
+                )
             ) {
 
                 closeNoteModal();
@@ -230,6 +302,7 @@ function setupEventListeners() {
 
         }
     );
+
 }
 
 
@@ -249,10 +322,6 @@ function showAuthPage() {
 }
 
 
-// ==========================================
-// DASHBOARD
-// ==========================================
-
 function showDashboard(email) {
 
     authPage.classList.add(
@@ -264,39 +333,65 @@ function showDashboard(email) {
     );
 
 
-    const cleanName =
-        email.split("@")[0] ||
+    const accountEmail =
+        email || "User";
+
+
+    const rawName =
+        accountEmail.split("@")[0] ||
         "User";
 
 
-    const formattedName =
-        cleanName.charAt(0).toUpperCase() +
-        cleanName.slice(1);
+    const name =
+        rawName.charAt(0).toUpperCase() +
+        rawName.slice(1);
 
 
-    document.getElementById(
-        "userName"
-    ).textContent =
-        formattedName;
+    const userName =
+        document.getElementById(
+            "userName"
+        );
 
 
-    document.getElementById(
-        "userEmail"
-    ).textContent =
-        email;
+    const userEmail =
+        document.getElementById(
+            "userEmail"
+        );
 
 
-    document.getElementById(
-        "userAvatar"
-    ).textContent =
-        formattedName
-            .charAt(0)
-            .toUpperCase();
+    const userAvatar =
+        document.getElementById(
+            "userAvatar"
+        );
+
+
+    if (userName) {
+
+        userName.textContent =
+            name;
+
+    }
+
+
+    if (userEmail) {
+
+        userEmail.textContent =
+            accountEmail;
+
+    }
+
+
+    if (userAvatar) {
+
+        userAvatar.textContent =
+            name.charAt(0).toUpperCase();
+
+    }
 }
 
 
 // ==========================================
-// AUTH SCREEN
+// AUTH SWITCHING
 // ==========================================
 
 function showRegister() {
@@ -333,40 +428,70 @@ function togglePassword(
 ) {
 
     const input =
-        document.getElementById(inputId);
+        document.getElementById(
+            inputId
+        );
+
 
     const icon =
-        button.querySelector("i");
+        button
+            ? button.querySelector("i")
+            : null;
 
 
-    if (!input || !icon) {
+    if (!input) {
         return;
     }
 
 
-    if (input.type === "password") {
+    if (
+        input.type ===
+        "password"
+    ) {
 
-        input.type = "text";
+        input.type =
+            "text";
 
-        icon.className =
-            "fa-regular fa-eye-slash";
 
-        button.setAttribute(
-            "aria-label",
-            "Hide password"
-        );
+        if (icon) {
+
+            icon.className =
+                "fa-regular fa-eye-slash";
+
+        }
+
+
+        if (button) {
+
+            button.setAttribute(
+                "aria-label",
+                "Hide password"
+            );
+
+        }
 
     } else {
 
-        input.type = "password";
+        input.type =
+            "password";
 
-        icon.className =
-            "fa-regular fa-eye";
 
-        button.setAttribute(
-            "aria-label",
-            "Show password"
-        );
+        if (icon) {
+
+            icon.className =
+                "fa-regular fa-eye";
+
+        }
+
+
+        if (button) {
+
+            button.setAttribute(
+                "aria-label",
+                "Show password"
+            );
+
+        }
     }
 }
 
@@ -375,7 +500,9 @@ function togglePassword(
 // API RESPONSE HELPER
 // ==========================================
 
-async function readResponse(response) {
+async function readResponse(
+    response
+) {
 
     const text =
         await response.text();
@@ -388,14 +515,17 @@ async function readResponse(response) {
 
     try {
 
-        return JSON.parse(text);
+        return JSON.parse(
+            text
+        );
 
     } catch (error) {
 
         console.error(
-            "Non-JSON server response:",
+            "Non-JSON response:",
             text
         );
+
 
         return {
             message:
@@ -406,35 +536,101 @@ async function readResponse(response) {
 
 
 // ==========================================
+// EXTRACT NOTES FROM API RESPONSE
+// ==========================================
+
+function extractNotes(
+    data
+) {
+
+    // API returns an array directly
+    if (Array.isArray(data)) {
+
+        return data;
+
+    }
+
+
+    // { notes: [...] }
+    if (
+        data &&
+        Array.isArray(data.notes)
+    ) {
+
+        return data.notes;
+
+    }
+
+
+    // { data: [...] }
+    if (
+        data &&
+        Array.isArray(data.data)
+    ) {
+
+        return data.data;
+
+    }
+
+
+    // { data: { notes: [...] } }
+    if (
+        data &&
+        data.data &&
+        Array.isArray(data.data.notes)
+    ) {
+
+        return data.data.notes;
+
+    }
+
+
+    return [];
+}
+
+
+// ==========================================
 // SIGN UP
 // ==========================================
 
-async function handleSignup(event) {
+async function handleSignup(
+    event
+) {
 
     event.preventDefault();
 
 
     const name =
         document
-            .getElementById("registerName")
+            .getElementById(
+                "registerName"
+            )
             .value
             .trim();
 
 
     const email =
         document
-            .getElementById("registerEmail")
+            .getElementById(
+                "registerEmail"
+            )
             .value
             .trim();
 
 
     const password =
         document
-            .getElementById("registerPassword")
+            .getElementById(
+                "registerPassword"
+            )
             .value;
 
 
-    if (!name || !email || !password) {
+    if (
+        !name ||
+        !email ||
+        !password
+    ) {
 
         showToast(
             "Please complete all fields.",
@@ -482,7 +678,9 @@ async function handleSignup(event) {
 
 
         const data =
-            await readResponse(response);
+            await readResponse(
+                response
+            );
 
 
         if (!response.ok) {
@@ -521,6 +719,7 @@ async function handleSignup(event) {
             error
         );
 
+
         showToast(
             "Unable to connect to the server.",
             "error"
@@ -541,25 +740,34 @@ async function handleSignup(event) {
 // LOGIN
 // ==========================================
 
-async function handleLogin(event) {
+async function handleLogin(
+    event
+) {
 
     event.preventDefault();
 
 
     const email =
         document
-            .getElementById("loginEmail")
+            .getElementById(
+                "loginEmail"
+            )
             .value
             .trim();
 
 
     const password =
         document
-            .getElementById("loginPassword")
+            .getElementById(
+                "loginPassword"
+            )
             .value;
 
 
-    if (!email || !password) {
+    if (
+        !email ||
+        !password
+    ) {
 
         showToast(
             "Please enter your email and password.",
@@ -606,7 +814,9 @@ async function handleLogin(event) {
 
 
         const data =
-            await readResponse(response);
+            await readResponse(
+                response
+            );
 
 
         if (!response.ok) {
@@ -624,7 +834,7 @@ async function handleLogin(event) {
         if (!data.token) {
 
             showToast(
-                "Login succeeded but no token was returned.",
+                "Login succeeded, but no token was returned.",
                 "error"
             );
 
@@ -632,7 +842,7 @@ async function handleLogin(event) {
         }
 
 
-        // Store login only for this browser session.
+        // Store login session
         sessionStorage.setItem(
             "token",
             data.token
@@ -657,7 +867,7 @@ async function handleLogin(event) {
 
 
         showToast(
-            "Welcome back!",
+            "Signed in successfully.",
             "success"
         );
 
@@ -667,6 +877,7 @@ async function handleLogin(event) {
             "Login error:",
             error
         );
+
 
         showToast(
             "Unable to connect to the server.",
@@ -691,20 +902,31 @@ async function handleLogin(event) {
 async function loadNotes() {
 
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
 
     if (!token) {
 
         showAuthPage();
-
         showLogin();
 
         return;
     }
 
 
-    showLoading(true);
+    loadingState.classList.remove(
+        "hidden"
+    );
+
+    emptyState.classList.add(
+        "hidden"
+    );
+
+    notesGrid.classList.add(
+        "hidden"
+    );
 
 
     try {
@@ -718,17 +940,26 @@ async function loadNotes() {
 
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer " +
+                            token,
+
+                        "Accept":
+                            "application/json"
                     }
                 }
             );
 
 
         const data =
-            await readResponse(response);
+            await readResponse(
+                response
+            );
 
 
-        if (response.status === 401) {
+        if (
+            response.status ===
+            401
+        ) {
 
             logoutUser(false);
 
@@ -737,7 +968,6 @@ async function loadNotes() {
                 "Your session has expired. Please sign in again.",
                 "error"
             );
-
 
             return;
         }
@@ -751,31 +981,14 @@ async function loadNotes() {
                 "error"
             );
 
-
             return;
         }
 
 
-        if (Array.isArray(data)) {
-
-            allNotes = data;
-
-        } else if (
-            Array.isArray(data.notes)
-        ) {
-
-            allNotes = data.notes;
-
-        } else if (
-            Array.isArray(data.data)
-        ) {
-
-            allNotes = data.data;
-
-        } else {
-
-            allNotes = [];
-        }
+        // Get all notes returned for
+        // the authenticated user.
+        allNotes =
+            extractNotes(data);
 
 
         renderNotes(
@@ -797,33 +1010,6 @@ async function loadNotes() {
 
     } finally {
 
-        showLoading(false);
-    }
-}
-
-
-// ==========================================
-// LOADING STATE
-// ==========================================
-
-function showLoading(isLoading) {
-
-    if (isLoading) {
-
-        loadingState.classList.remove(
-            "hidden"
-        );
-
-        emptyState.classList.add(
-            "hidden"
-        );
-
-        notesGrid.classList.add(
-            "hidden"
-        );
-
-    } else {
-
         loadingState.classList.add(
             "hidden"
         );
@@ -835,12 +1021,16 @@ function showLoading(isLoading) {
 // RENDER NOTES
 // ==========================================
 
-function renderNotes(notes) {
+function renderNotes(
+    notes
+) {
 
     const query =
-        searchInput.value
-            .trim()
-            .toLowerCase();
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : "";
 
 
     const filteredNotes =
@@ -849,13 +1039,15 @@ function renderNotes(notes) {
 
                 const title =
                     String(
-                        note.title || ""
+                        note.title ||
+                        ""
                     ).toLowerCase();
 
 
                 const content =
                     String(
-                        note.content || ""
+                        note.content ||
+                        ""
                     ).toLowerCase();
 
 
@@ -864,6 +1056,7 @@ function renderNotes(notes) {
                     title.includes(query) ||
                     content.includes(query)
                 );
+
             }
         );
 
@@ -872,22 +1065,33 @@ function renderNotes(notes) {
         "";
 
 
-    document.getElementById(
-        "notesCount"
-    ).textContent =
-        String(
-            filteredNotes.length
+    if (notesCount) {
+
+        notesCount.textContent =
+            String(
+                filteredNotes.length
+            );
+
+    }
+
+
+    if (clearSearchBtn) {
+
+        clearSearchBtn.classList.toggle(
+            "hidden",
+            !query
         );
 
+    }
 
-    clearSearchBtn.classList.toggle(
-        "hidden",
-        query.length === 0
-    );
 
+    // --------------------------------------
+    // NO NOTES / NO SEARCH RESULTS
+    // --------------------------------------
 
     if (
-        filteredNotes.length === 0
+        filteredNotes.length ===
+        0
     ) {
 
         notesGrid.classList.add(
@@ -899,55 +1103,93 @@ function renderNotes(notes) {
         );
 
 
-        if (query) {
-
+        const emptyTitle =
             document.getElementById(
                 "emptyTitle"
-            ).textContent =
-                "No notes found";
+            );
 
 
+        const emptyText =
             document.getElementById(
                 "emptyText"
-            ).textContent =
-                "Try a different search term.";
+            );
 
 
+        const createButton =
             document.getElementById(
                 "emptyCreateButton"
-            ).classList.add(
-                "hidden"
             );
 
 
-            clearSearchBtnEmpty.classList.remove(
-                "hidden"
-            );
+        if (query) {
+
+            if (emptyTitle) {
+
+                emptyTitle.textContent =
+                    "No notes found";
+
+            }
+
+
+            if (emptyText) {
+
+                emptyText.textContent =
+                    "Try a different search term.";
+
+            }
+
+
+            if (createButton) {
+
+                createButton.classList.add(
+                    "hidden"
+                );
+
+            }
+
+
+            if (clearSearchBtnEmpty) {
+
+                clearSearchBtnEmpty.classList.remove(
+                    "hidden"
+                );
+
+            }
 
         } else {
 
-            document.getElementById(
-                "emptyTitle"
-            ).textContent =
-                "No notes yet";
+            if (emptyTitle) {
+
+                emptyTitle.textContent =
+                    "No notes yet";
+
+            }
 
 
-            document.getElementById(
-                "emptyText"
-            ).textContent =
-                "Create your first note and keep your ideas organized.";
+            if (emptyText) {
+
+                emptyText.textContent =
+                    "Create your first note and keep your ideas organized.";
+
+            }
 
 
-            document.getElementById(
-                "emptyCreateButton"
-            ).classList.remove(
-                "hidden"
-            );
+            if (createButton) {
+
+                createButton.classList.remove(
+                    "hidden"
+                );
+
+            }
 
 
-            clearSearchBtnEmpty.classList.add(
-                "hidden"
-            );
+            if (clearSearchBtnEmpty) {
+
+                clearSearchBtnEmpty.classList.add(
+                    "hidden"
+                );
+
+            }
         }
 
 
@@ -955,10 +1197,13 @@ function renderNotes(notes) {
     }
 
 
+    // --------------------------------------
+    // SHOW NOTES
+    // --------------------------------------
+
     emptyState.classList.add(
         "hidden"
     );
-
 
     notesGrid.classList.remove(
         "hidden"
@@ -981,21 +1226,29 @@ function renderNotes(notes) {
 // CREATE NOTE CARD
 // ==========================================
 
-function createNoteCard(note) {
+function createNoteCard(
+    note
+) {
 
     const card =
         document.createElement(
             "article"
         );
 
+
     card.className =
         "note-card";
 
+
+    // --------------------------------------
+    // TOP
+    // --------------------------------------
 
     const top =
         document.createElement(
             "div"
         );
+
 
     top.className =
         "note-top";
@@ -1005,6 +1258,7 @@ function createNoteCard(note) {
         document.createElement(
             "span"
         );
+
 
     date.className =
         "note-date";
@@ -1022,32 +1276,38 @@ function createNoteCard(note) {
             "div"
         );
 
+
     actions.className =
         "note-actions";
 
 
-    // ======================================
+    // --------------------------------------
     // EDIT BUTTON
-    // ======================================
+    // --------------------------------------
 
     const editButton =
         document.createElement(
             "button"
         );
 
+
     editButton.type =
         "button";
+
 
     editButton.className =
         "icon-btn edit-btn";
 
+
     editButton.title =
         "Edit note";
+
 
     editButton.setAttribute(
         "aria-label",
         "Edit note"
     );
+
 
     editButton.innerHTML =
         "<i class='fa-solid fa-pen'></i>";
@@ -1063,28 +1323,33 @@ function createNoteCard(note) {
     );
 
 
-    // ======================================
+    // --------------------------------------
     // DELETE BUTTON
-    // ======================================
+    // --------------------------------------
 
     const deleteButton =
         document.createElement(
             "button"
         );
 
+
     deleteButton.type =
         "button";
+
 
     deleteButton.className =
         "icon-btn delete-btn";
 
+
     deleteButton.title =
         "Delete note";
+
 
     deleteButton.setAttribute(
         "aria-label",
         "Delete note"
     );
+
 
     deleteButton.innerHTML =
         "<i class='fa-regular fa-trash-can'></i>";
@@ -1094,7 +1359,9 @@ function createNoteCard(note) {
         "click",
         function () {
 
-            deleteNote(note._id);
+            deleteNote(
+                note._id
+            );
 
         }
     );
@@ -1103,6 +1370,7 @@ function createNoteCard(note) {
     actions.appendChild(
         editButton
     );
+
 
     actions.appendChild(
         deleteButton
@@ -1113,47 +1381,51 @@ function createNoteCard(note) {
         date
     );
 
+
     top.appendChild(
         actions
     );
 
 
-    // ======================================
+    // --------------------------------------
     // TITLE
-    // ======================================
+    // --------------------------------------
 
     const title =
         document.createElement(
             "h3"
         );
 
+
     title.textContent =
         note.title ||
         "Untitled";
 
 
-    // ======================================
+    // --------------------------------------
     // CONTENT
-    // ======================================
+    // --------------------------------------
 
     const content =
         document.createElement(
             "p"
         );
 
+
     content.textContent =
         note.content ||
         "";
 
 
-    // ======================================
+    // --------------------------------------
     // FOOTER
-    // ======================================
+    // --------------------------------------
 
     const footer =
         document.createElement(
             "div"
         );
+
 
     footer.className =
         "note-footer";
@@ -1164,6 +1436,7 @@ function createNoteCard(note) {
             "span"
         );
 
+
     type.innerHTML =
         "<i class='fa-regular fa-note-sticky'></i> Note";
 
@@ -1172,6 +1445,7 @@ function createNoteCard(note) {
         document.createElement(
             "span"
         );
+
 
     status.textContent =
         note.updatedAt
@@ -1183,22 +1457,30 @@ function createNoteCard(note) {
         type
     );
 
+
     footer.appendChild(
         status
     );
 
 
+    // --------------------------------------
+    // BUILD CARD
+    // --------------------------------------
+
     card.appendChild(
         top
     );
+
 
     card.appendChild(
         title
     );
 
+
     card.appendChild(
         content
     );
+
 
     card.appendChild(
         footer
@@ -1213,13 +1495,33 @@ function createNoteCard(note) {
 // CREATE / UPDATE NOTE
 // ==========================================
 
-async function handleNoteSubmit(event) {
+async function handleNoteSubmit(
+    event
+) {
 
     event.preventDefault();
 
 
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
+
+
+    if (!token) {
+
+        showAuthPage();
+        showLogin();
+
+
+        showToast(
+            "Please sign in first.",
+            "error"
+        );
+
+
+        return;
+    }
 
 
     const editingId =
@@ -1229,38 +1531,32 @@ async function handleNoteSubmit(event) {
 
     const title =
         document
-            .getElementById("noteTitle")
+            .getElementById(
+                "noteTitle"
+            )
             .value
             .trim();
 
 
     const content =
         document
-            .getElementById("noteContent")
+            .getElementById(
+                "noteContent"
+            )
             .value
             .trim();
 
 
-    if (!token) {
-
-        showAuthPage();
-        showLogin();
-
-        showToast(
-            "Please sign in first.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    if (!title || !content) {
+    if (
+        !title ||
+        !content
+    ) {
 
         showToast(
             "Please enter both title and content.",
             "error"
         );
+
 
         return;
     }
@@ -1273,25 +1569,17 @@ async function handleNoteSubmit(event) {
 
 
     const isEditing =
-        Boolean(editingId);
-
-
-    const loadingMessage =
-        isEditing
-            ? "Updating note..."
-            : "Saving note...";
-
-
-    const successMessage =
-        isEditing
-            ? "Note updated successfully."
-            : "Note created successfully.";
+        Boolean(
+            editingId
+        );
 
 
     setButtonLoading(
         submitButton,
         true,
-        loadingMessage
+        isEditing
+            ? "Updating note..."
+            : "Saving note..."
     );
 
 
@@ -1315,7 +1603,8 @@ async function handleNoteSubmit(event) {
                                 "application/json",
 
                             "Authorization":
-                                "Bearer " + token
+                                "Bearer " +
+                                token
                         },
 
                         body: JSON.stringify({
@@ -1339,7 +1628,8 @@ async function handleNoteSubmit(event) {
                                 "application/json",
 
                             "Authorization":
-                                "Bearer " + token
+                                "Bearer " +
+                                token
                         },
 
                         body: JSON.stringify({
@@ -1352,17 +1642,24 @@ async function handleNoteSubmit(event) {
 
 
         const data =
-            await readResponse(response);
+            await readResponse(
+                response
+            );
 
 
-        if (response.status === 401) {
+        if (
+            response.status ===
+            401
+        ) {
 
             logoutUser(false);
+
 
             showToast(
                 "Your session has expired. Please sign in again.",
                 "error"
             );
+
 
             return;
         }
@@ -1380,6 +1677,7 @@ async function handleNoteSubmit(event) {
                 "error"
             );
 
+
             return;
         }
 
@@ -1391,7 +1689,9 @@ async function handleNoteSubmit(event) {
 
 
         showToast(
-            successMessage,
+            isEditing
+                ? "Note updated successfully."
+                : "Note created successfully.",
             "success"
         );
 
@@ -1426,6 +1726,7 @@ async function handleNoteSubmit(event) {
 function openCreateModal() {
 
     noteForm.reset();
+
 
     delete noteModal.dataset.editingId;
 
@@ -1465,7 +1766,9 @@ function openCreateModal() {
         function () {
 
             document
-                .getElementById("noteTitle")
+                .getElementById(
+                    "noteTitle"
+                )
                 .focus();
 
         },
@@ -1478,7 +1781,9 @@ function openCreateModal() {
 // OPEN EDIT MODAL
 // ==========================================
 
-function openEditModal(note) {
+function openEditModal(
+    note
+) {
 
     noteForm.reset();
 
@@ -1536,7 +1841,9 @@ function openEditModal(note) {
         function () {
 
             document
-                .getElementById("noteTitle")
+                .getElementById(
+                    "noteTitle"
+                )
                 .focus();
 
         },
@@ -1593,10 +1900,14 @@ function closeNoteModal() {
 // DELETE NOTE
 // ==========================================
 
-async function deleteNote(noteId) {
+async function deleteNote(
+    noteId
+) {
 
     const token =
-        sessionStorage.getItem("token");
+        sessionStorage.getItem(
+            "token"
+        );
 
 
     if (!token) {
@@ -1604,10 +1915,12 @@ async function deleteNote(noteId) {
         showAuthPage();
         showLogin();
 
+
         showToast(
             "Please sign in first.",
             "error"
         );
+
 
         return;
     }
@@ -1636,24 +1949,32 @@ async function deleteNote(noteId) {
 
                     headers: {
                         "Authorization":
-                            "Bearer " + token
+                            "Bearer " +
+                            token
                     }
                 }
             );
 
 
         const data =
-            await readResponse(response);
+            await readResponse(
+                response
+            );
 
 
-        if (response.status === 401) {
+        if (
+            response.status ===
+            401
+        ) {
 
             logoutUser(false);
+
 
             showToast(
                 "Your session has expired. Please sign in again.",
                 "error"
             );
+
 
             return;
         }
@@ -1666,6 +1987,7 @@ async function deleteNote(noteId) {
                 "Could not delete note.",
                 "error"
             );
+
 
             return;
         }
@@ -1712,9 +2034,11 @@ function clearSearch() {
     searchInput.value =
         "";
 
+
     renderNotes(
         allNotes
     );
+
 
     searchInput.focus();
 }
@@ -1724,7 +2048,9 @@ function clearSearch() {
 // LOGOUT
 // ==========================================
 
-function logoutUser(showMessage) {
+function logoutUser(
+    showMessage
+) {
 
     sessionStorage.removeItem(
         "token"
@@ -1754,7 +2080,19 @@ function logoutUser(showMessage) {
     registerForm.reset();
 
 
-    if (showMessage !== false) {
+    searchInput.value =
+        "";
+
+
+    renderNotes(
+        []
+    );
+
+
+    if (
+        showMessage !==
+        false
+    ) {
 
         showToast(
             "You have been signed out.",
@@ -1781,10 +2119,13 @@ function setButtonLoading(
 
     if (loading) {
 
-        if (!button.dataset.originalHtml) {
+        if (
+            !button.dataset.originalHtml
+        ) {
 
             button.dataset.originalHtml =
                 button.innerHTML;
+
         }
 
 
@@ -1811,6 +2152,7 @@ function setButtonLoading(
             button.innerHTML =
                 button.dataset.originalHtml;
 
+
             delete button.dataset.originalHtml;
 
         }
@@ -1827,33 +2169,28 @@ function showToast(
     type
 ) {
 
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    const toastMessage =
-        document.getElementById(
-            "toastMessage"
-        );
-
-
-    const toastIcon =
-        document.getElementById(
-            "toastIcon"
-        );
-
-
-    toast.className =
-        "toast " + type;
+    if (
+        !toast ||
+        !toastMessage ||
+        !toastIcon
+    ) {
+        return;
+    }
 
 
     toastMessage.textContent =
         message;
 
 
-    if (type === "success") {
+    toast.className =
+        "toast " +
+        type;
+
+
+    if (
+        type ===
+        "success"
+    ) {
 
         toastIcon.className =
             "fa-solid fa-circle-check";
@@ -1886,4 +2223,47 @@ function showToast(
             },
             3500
         );
+}
+
+
+// ==========================================
+// DATE FORMATTER
+// ==========================================
+
+function formatDate(
+    date
+) {
+
+    if (!date) {
+
+        return "Today";
+
+    }
+
+
+    const parsedDate =
+        new Date(
+            date
+        );
+
+
+    if (
+        Number.isNaN(
+            parsedDate.getTime()
+        )
+    ) {
+
+        return "Today";
+
+    }
+
+
+    return parsedDate.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
 }
