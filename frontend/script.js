@@ -85,21 +85,50 @@ let toastTimer = null;
 
 document.addEventListener(
     "DOMContentLoaded",
-    function () {
+    async function () {
 
         setupEventListeners();
 
-        // Requirement:
-        // Every time the site is opened, start at Sign In.
-        // Do not automatically restore a previous account.
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("userEmail");
+        // Restore the login session after a page refresh.
+        await restoreSession();
+
+    }
+);
+
+
+// ==========================================
+// RESTORE LOGIN SESSION
+// ==========================================
+
+async function restoreSession() {
+
+    const token =
+        sessionStorage.getItem(
+            "token"
+        );
+
+    const email =
+        sessionStorage.getItem(
+            "userEmail"
+        );
+
+    // No active session: show login page.
+    if (!token || !email) {
 
         showAuthPage();
         showLogin();
 
+        return;
     }
-);
+
+    // Active session found: restore dashboard
+    // and load notes for the logged-in user.
+    showDashboard(
+        email
+    );
+
+    await loadNotes();
+}
 
 
 // ==========================================
